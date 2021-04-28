@@ -3,7 +3,6 @@ import subprocess
 import socket
 
 IP_ADDRESS = 'localhost'  # замени на ip сервера
-PORT = 9090
 
 
 # подпроцесс для вызова nmap
@@ -14,11 +13,11 @@ def process(cmd):
 
 
 # socket
-serv = socket.socket(socket.AF_INET, socket.SOCK_STREAM)  # открываем сокет
-serv.bind((IP_ADDRESS, PORT))  # привязываем сокет к ip и порту (объявлены выше)
+serv = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)  # открываем сокет
+serv.bind(IP_ADDRESS)  # привязываем сокет к ip и порту (объявлены выше)
 serv.listen()  # сокет слушает порт
 
-print(f"Server started {(IP_ADDRESS, PORT)}")
+print(f"Server started {IP_ADDRESS}")
 
 # вечный цикл с сервером
 while True:
@@ -37,5 +36,6 @@ while True:
         conn.close()  # закрыли соединение
     except KeyboardInterrupt:  # выход инициирован с клавиатуры (ctrl + c)
         print("Server Stopped")
+        break
     except ConnectionResetError:
         print("Client Disconnected")
