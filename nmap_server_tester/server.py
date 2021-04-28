@@ -1,8 +1,18 @@
 #!bin/python3
 import subprocess
 import socket
+import os
 
-IP_ADDRESS = 'localhost'  # замени на ip сервера
+# socket
+SOCKET_FILE = './uds_socket'
+if os.path.exists(SOCKET_FILE):
+    os.remove(SOCKET_FILE)
+
+serv = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)  # открываем сокет
+serv.bind(SOCKET_FILE)  # привязываем сокет к ip и порту (объявлены выше)
+serv.listen()  # сокет слушает порт
+
+print(f"Server started")
 
 
 # подпроцесс для вызова nmap
@@ -11,13 +21,6 @@ def process(cmd):
     output = pr.communicate()[0].decode('utf-8')  # вывод в дайтах поэтому после получения декодируем вывод nmap
     return output
 
-
-# socket
-serv = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)  # открываем сокет
-serv.bind(IP_ADDRESS)  # привязываем сокет к ip и порту (объявлены выше)
-serv.listen()  # сокет слушает порт
-
-print(f"Server started {IP_ADDRESS}")
 
 # вечный цикл с сервером
 while True:
@@ -36,6 +39,8 @@ while True:
         conn.close()  # закрыли соединение
     except KeyboardInterrupt:  # выход инициирован с клавиатуры (ctrl + c)
         print("Server Stopped")
+        serv.close()
+        os.remove(SOCKET_FILE)
         break
     except ConnectionResetError:
         print("Client Disconnected")
